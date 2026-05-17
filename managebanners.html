@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Manage Banners - mega-store.in</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #1a1a2e;
+            --accent: #e94560;
+            --accent-hover: #c73a51;
+            --success: #16a34a;
+            --success-hover: #15803d;
+            --danger: #dc2626;
+            --danger-hover: #b91c1c;
+            --warning: #ea580c;
+            --text: #333;
+            --text-light: #666;
+            --text-lighter: #888;
+            --bg: #f0f2f5;
+            --card: #fff;
+            --border: #d0d0d0;
+            --sidebar: #1a1a2e;
+            --sidebar-w: 260px;
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+        a { text-decoration: none; color: inherit; }
+        img { max-width: 100%; display: block; }
+
+        .loading-overlay { position: fixed; inset: 0; background: #fff; z-index: 10000; display: flex; align-items: center; justify-content: center; transition: opacity .4s, visibility .4s; }
+        .loading-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .loader { width: 48px; height: 48px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .admin-layout { display: flex; min-height: 100vh; }
+        
+        .sidebar { width: var(--sidebar-w); background: var(--sidebar); color: #fff; position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; z-index: 100; }
+        .sidebar-header { padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,.1); }
+        .sidebar-header .logo { font-size: 22px; font-weight: 900; color: #fff; }
+        .sidebar-header .logo span { color: var(--accent); }
+        .sidebar-header p { font-size: 12px; color: rgba(255,255,255,.5); margin-top: 4px; }
+        .sidebar-nav { padding: 16px 12px; }
+        .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; font-size: 14px; font-weight: 500; color: rgba(255,255,255,.7); transition: .2s; margin-bottom: 4px; }
+        .sidebar-nav a:hover, .sidebar-nav a.active { background: rgba(255,255,255,.1); color: #fff; }
+        .sidebar-nav a.active { background: var(--accent); }
+        .sidebar-nav svg { flex-shrink: 0; }
+        .sidebar-footer { padding: 16px 24px; border-top: 1px solid rgba(255,255,255,.1); position: absolute; bottom: 0; left: 0; right: 0; font-size: 12px; color: rgba(255,255,255,.4); }
+
+        .main-content { flex: 1; margin-left: var(--sidebar-w); }
+        .top-header { background: var(--card); border-bottom: 1px solid var(--border); padding: 0 32px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+        .top-header h1 { font-size: 18px; font-weight: 700; }
+        .top-header-right { display: flex; align-items: center; gap: 16px; }
+        .view-site-btn { padding: 8px 18px; background: var(--accent); color: #fff; border-radius: 6px; font-size: 13px; font-weight: 600; transition: .2s; }
+        .view-site-btn:hover { background: var(--accent-hover); }
+
+        .content-area { padding: 32px; max-width: 1200px; }
+
+        /* Alert */
+        .alert { padding: 14px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; margin-bottom: 20px; display: none; }
+        .alert.show { display: block; }
+        .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+        /* Stats */
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
+        .stat-card { background: var(--card); border-radius: 12px; padding: 24px; border: 1px solid var(--border); display: flex; align-items: center; gap: 16px; }
+        .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+        .stat-icon.blue { background: #dbeafe; color: #2563eb; }
+        .stat-icon.green { background: #dcfce7; color: #16a34a; }
+        .stat-icon.orange { background: #ffedd5; color: #ea580c; }
+        .stat-info h3 { font-size: 24px; font-weight: 800; color: var(--primary); }
+        .stat-info p { font-size: 13px; color: var(--text-lighter); }
+
+        /* Form */
+        .form-section { background: var(--card); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 32px; }
+        .form-header { padding: 20px 28px; border-bottom: 1px solid var(--border); }
+        .form-header h2 { font-size: 16px; font-weight: 700; }
+        .form-body { padding: 28px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-group { margin-bottom: 8px; }
+        .form-group.full { grid-column: 1 / -1; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+        .form-group label span { color: var(--accent); }
+        .form-group input, .form-group select { width: 100%; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 14px; outline: none; transition: .2s; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+        
+        .image-upload { border: 2px dashed var(--border); border-radius: 10px; padding: 40px; text-align: center; cursor: pointer; transition: .2s; position: relative; }
+        .image-upload:hover { border-color: var(--accent); }
+        .image-upload.has-image { padding: 0; border-style: solid; }
+        .image-upload input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+        .upload-placeholder { color: var(--text-lighter); }
+        .upload-placeholder svg { margin: 0 auto 12px; opacity: .5; }
+        .upload-preview { width: 100%; max-height: 250px; object-fit: cover; border-radius: 8px; }
+
+        .btn { padding: 12px 28px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: .2s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-primary:disabled { opacity: .6; cursor: not-allowed; }
+        .btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--border); }
+        .btn-success { background: var(--success); color: #fff; }
+        .btn-success:hover { background: var(--success-hover); }
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-danger:hover { background: var(--danger-hover); }
+        .btn-sm { padding: 6px 14px; font-size: 12px; }
+
+        .form-actions { display: flex; gap: 12px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+
+        /* Banners Grid */
+        .banners-section { background: var(--card); border-radius: 12px; border: 1px solid var(--border); }
+        .banners-header { padding: 20px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .banners-header h2 { font-size: 16px; font-weight: 700; }
+        .banners-grid { padding: 28px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .banner-card { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: .2s; }
+        .banner-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.1); }
+        .banner-img { width: 100%; height: 160px; object-fit: cover; }
+        .banner-body { padding: 16px; }
+        .banner-link { font-size: 13px; color: var(--accent); word-break: break-all; margin-bottom: 10px; display: block; }
+        .banner-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-lighter); margin-bottom: 12px; }
+        .banner-status { display: inline-flex; align-items: center; gap: 6px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .status-dot.active { background: var(--success); }
+        .status-dot.inactive { background: var(--text-lighter); }
+        .banner-actions { display: flex; gap: 6px; }
+        
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-lighter); grid-column: 1 / -1; }
+
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 2000; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: var(--card); border-radius: 12px; width: 90%; max-width: 600px; }
+        .modal-header { padding: 20px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .modal-header h3 { font-size: 16px; font-weight: 700; }
+        .modal-close { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 6px; background: none; cursor: pointer; font-size: 16px; }
+        .modal-body { padding: 28px; }
+        .modal-footer { padding: 16px 28px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); transition: .3s; }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            .stats-row { grid-template-columns: 1fr; }
+            .form-grid { grid-template-columns: 1fr; }
+            .content-area { padding: 16px; }
+            .banners-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loader"><div class="loader"></div></div>
+
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">mega-store<span>.in</span></div>
+                <p>Admin Dashboard</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="uploadnews.html">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    Upload News
+                </a>
+                <a href="managebanners.html" class="active">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    Manage Banners
+                </a>
+                <a href="index.html" target="_blank">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    View Website
+                </a>
+            </nav>
+            <div class="sidebar-footer">&copy; 2025 mega-store.in</div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="top-header">
+                <h1>Manage Banners</h1>
+                <div class="top-header-right">
+                    <a href="index.html" target="_blank" class="view-site-btn">View Website</a>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <!-- Alerts -->
+                <div class="alert alert-success" id="successAlert"></div>
+                <div class="alert alert-error" id="errorAlert"></div>
+
+                <!-- Stats -->
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        </div>
+                        <div class="stat-info"><h3 id="totalBanners">0</h3><p>Total Banners</p></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <div class="stat-info"><h3 id="activeBanners">0</h3><p>Active</p></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <div class="stat-info"><h3 id="recentBanners">0</h3><p>Added This Week</p></div>
+                    </div>
+                </div>
+
+                <!-- Upload Form -->
+                <div class="form-section">
+                    <div class="form-header">
+                        <h2>Add New Banner</h2>
+                    </div>
+                    <div class="form-body">
+                        <form id="bannerForm" onsubmit="handleSubmit(event)">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Banner Title <span>*</span></label>
+                                    <input type="text" id="bannerTitle" required placeholder="e.g., Summer Sale Banner">
+                                </div>
+                                <div class="form-group">
+                                    <label>Redirect Link <span>*</span></label>
+                                    <input type="url" id="bannerLink" required placeholder="https://example.com/offer">
+                                </div>
+                                <div class="form-group full">
+                                    <label>Banner Image <span>*</span></label>
+                                    <div class="image-upload" id="imageUpload" onclick="document.getElementById('bannerFile').click()">
+                                        <input type="file" id="bannerFile" accept="image/*" onchange="handleImageSelect(event)">
+                                        <div class="upload-placeholder" id="uploadPlaceholder">
+                                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                            <div>Click to upload banner image</div>
+                                            <div style="font-size:12px;color:#aaa;margin-top:4px">Recommended: 1200 x 400 pixels</div>
+                                        </div>
+                                        <img class="upload-preview" id="uploadPreview" style="display:none">
+                                    </div>
+                                    <input type="hidden" id="imageUrl">
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary" id="submitBtn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                    Add Banner
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="resetForm()">Reset</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Banners List -->
+                <div class="banners-section">
+                    <div class="banners-header">
+                        <h2>All Banners</h2>
+                        <span style="font-size:13px;color:var(--text-lighter)" id="bannerCountText">0 banners</span>
+                    </div>
+                    <div class="banners-grid" id="bannersGrid">
+                        <div class="empty-state">Loading banners...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Edit Banner</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <input type="hidden" id="editId">
+                    <div class="form-group" style="margin-bottom:16px">
+                        <label>Banner Title</label>
+                        <input type="text" id="editTitle" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom:16px">
+                        <label>Redirect Link</label>
+                        <input type="url" id="editLink" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom:16px">
+                        <label>Current Image</label>
+                        <img id="editImagePreview" style="width:100%;max-height:150px;object-fit:cover;border-radius:8px;margin-bottom:8px">
+                        <input type="file" id="editImageFile" accept="image/*" onchange="handleEditImage(event)" style="font-size:13px">
+                        <input type="hidden" id="editImageUrl">
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="editStatus">
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-success" onclick="saveEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getDatabase, ref, push, set, onValue, remove, update } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQnUabSu6WGbq1te-hBEAYPZdOO93_Mfk",
+            authDomain: "mega-store-2025.firebaseapp.com",
+            databaseURL: "https://mega-store-2025-default-rtdb.firebaseio.com",
+            projectId: "mega-store-2025",
+            storageBucket: "mega-store-2025.firebasestorage.app",
+            messagingSenderId: "190838364165",
+            appId: "1:190838364165:web:43a969b7b852777061e46c",
+            measurementId: "G-CZR2N1HF9K"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const IMGBB_API_KEY = 'f403648d51b37446c09a5a47d4fe4cd8';
+
+        let allBanners = [];
+        let selectedFile = null;
+        let editSelectedFile = null;
+        let editingId = null;
+
+        function showAlert(type, msg) {
+            const el = document.getElementById(type === 'success' ? 'successAlert' : 'errorAlert');
+            el.textContent = msg;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 5000);
+        }
+
+        window.handleImageSelect = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            selectedFile = file;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                document.getElementById('uploadPreview').src = ev.target.result;
+                document.getElementById('uploadPreview').style.display = 'block';
+                document.getElementById('uploadPlaceholder').style.display = 'none';
+                document.getElementById('imageUpload').classList.add('has-image');
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.handleEditImage = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            editSelectedFile = file;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                document.getElementById('editImagePreview').src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        async function uploadToImgBB(file) {
+            const formData = new FormData();
+            formData.append('image', file);
+            const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            if (data.success) return data.data.url;
+            throw new Error(data.error?.message || 'Image upload failed');
+        }
+
+        window.handleSubmit = async function(e) {
+            e.preventDefault();
+            const title = document.getElementById('bannerTitle').value.trim();
+            const link = document.getElementById('bannerLink').value.trim();
+
+            if (!title || !link) { showAlert('error', 'Please fill all required fields'); return; }
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite"></span> Uploading...';
+
+            try {
+                let imageUrl = '';
+                if (selectedFile) {
+                    imageUrl = await uploadToImgBB(selectedFile);
+                } else {
+                    showAlert('error', 'Please upload a banner image');
+                    return;
+                }
+
+                const bannerRef = push(ref(db, 'banners'));
+                await set(bannerRef, {
+                    title,
+                    link,
+                    imageUrl,
+                    active: true,
+                    timestamp: Date.now()
+                });
+
+                showAlert('success', 'Banner added successfully!');
+                resetForm();
+            } catch (err) {
+                showAlert('error', 'Error: ' + err.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Add Banner';
+            }
+        };
+
+        window.resetForm = function() {
+            document.getElementById('bannerForm').reset();
+            document.getElementById('uploadPreview').style.display = 'none';
+            document.getElementById('uploadPreview').src = '';
+            document.getElementById('uploadPlaceholder').style.display = 'block';
+            document.getElementById('imageUpload').classList.remove('has-image');
+            document.getElementById('imageUrl').value = '';
+            selectedFile = null;
+        };
+
+        function fetchBanners() {
+            const bannersRef = ref(db, 'banners');
+            onValue(bannersRef, (snapshot) => {
+                const data = snapshot.val();
+                allBanners = data ? Object.entries(data).map(([id, item]) => ({ id, ...item })).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)) : [];
+                
+                const now = Date.now();
+                const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
+                
+                document.getElementById('totalBanners').textContent = allBanners.length;
+                document.getElementById('activeBanners').textContent = allBanners.filter(b => b.active).length;
+                document.getElementById('recentBanners').textContent = allBanners.filter(b => (b.timestamp || 0) > weekAgo).length;
+                document.getElementById('bannerCountText').textContent = `${allBanners.length} banner${allBanners.length !== 1 ? 's' : ''}`;
+                
+                renderBanners();
+                document.getElementById('loader').classList.add('hidden');
+            });
+        }
+
+        function renderBanners() {
+            const grid = document.getElementById('bannersGrid');
+            if (!allBanners.length) {
+                grid.innerHTML = '<div class="empty-state"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="margin:0 auto 12px;opacity:.4"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><div>No banners added yet</div></div>';
+                return;
+            }
+            
+            grid.innerHTML = allBanners.map(b => `
+                <div class="banner-card">
+                    <img src="${b.imageUrl || ''}" alt="${escapeHtml(b.title)}" class="banner-img" loading="lazy">
+                    <div class="banner-body">
+                        <div style="font-weight:600;font-size:14px;margin-bottom:6px;color:var(--primary)">${escapeHtml(b.title)}</div>
+                        <a href="${b.link}" target="_blank" class="banner-link">${escapeHtml(b.link.substring(0, 40))}...</a>
+                        <div class="banner-meta">
+                            <span class="banner-status">
+                                <span class="status-dot ${b.active ? 'active' : 'inactive'}"></span>
+                                ${b.active ? 'Active' : 'Inactive'}
+                            </span>
+                            <span>${formatDate(b.timestamp)}</span>
+                        </div>
+                        <div class="banner-actions">
+                            <button class="btn btn-success btn-sm" onclick="openEdit('${b.id}')">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteBanner('${b.id}')">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.deleteBanner = async function(id) {
+            if (!confirm('Are you sure you want to delete this banner?')) return;
+            try {
+                await remove(ref(db, `banners/${id}`));
+                showAlert('success', 'Banner deleted successfully');
+            } catch (err) {
+                showAlert('error', 'Error deleting: ' + err.message);
+            }
+        };
+
+        window.openEdit = function(id) {
+            const banner = allBanners.find(b => b.id === id);
+            if (!banner) return;
+            editingId = id;
+            document.getElementById('editId').value = id;
+            document.getElementById('editTitle').value = banner.title;
+            document.getElementById('editLink').value = banner.link;
+            document.getElementById('editImageUrl').value = banner.imageUrl || '';
+            document.getElementById('editImagePreview').src = banner.imageUrl || '';
+            document.getElementById('editStatus').value = banner.active ? 'true' : 'false';
+            editSelectedFile = null;
+            document.getElementById('editModal').classList.add('active');
+        };
+
+        window.closeModal = function() {
+            document.getElementById('editModal').classList.remove('active');
+            editingId = null;
+            editSelectedFile = null;
+        };
+
+        window.saveEdit = async function() {
+            const title = document.getElementById('editTitle').value.trim();
+            const link = document.getElementById('editLink').value.trim();
+            const active = document.getElementById('editStatus').value === 'true';
+            let imageUrl = document.getElementById('editImageUrl').value;
+
+            if (!title || !link) { showAlert('error', 'Please fill all fields'); return; }
+
+            try {
+                if (editSelectedFile) imageUrl = await uploadToImgBB(editSelectedFile);
+                await update(ref(db, `banners/${editingId}`), { title, link, imageUrl, active, timestamp: Date.now() });
+                showAlert('success', 'Banner updated successfully');
+                closeModal();
+            } catch (err) {
+                showAlert('error', 'Error updating: ' + err.message);
+            }
+        };
+
+        function escapeHtml(t) { return (t || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }
+        function formatDate(ts) { if (!ts) return '-'; const d = new Date(Number(ts)); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+
+        fetchBanners();
+    </script>
+</body>
+</html>
