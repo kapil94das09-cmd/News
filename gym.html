@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IronPulse Gym - Transform Your Body</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #ff6b00;
+            --primary-dark: #e65100;
+            --secondary: #1a1a2e;
+            --dark: #0f0f1a;
+            --darker: #0a0a12;
+            --light: #f5f5f5;
+            --gray: #888;
+            --success: #00c853;
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--darker); color: var(--light); overflow-x: hidden; }
+        h1, h2, h3, h4 { font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 1px; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--dark); }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+
+        nav { position: fixed; top: 0; width: 100%; padding: 20px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; transition: all 0.3s ease; background: transparent; }
+        nav.scrolled { background: rgba(15, 15, 26, 0.95); backdrop-filter: blur(10px); padding: 15px 5%; box-shadow: 0 5px 30px rgba(0,0,0,0.3); }
+        .logo { font-family: 'Oswald', sans-serif; font-size: 2rem; font-weight: 700; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .logo i { font-size: 1.5rem; }
+        .nav-links { display: flex; list-style: none; gap: 40px; }
+        .nav-links a { color: var(--light); text-decoration: none; font-weight: 500; font-size: 0.95rem; position: relative; transition: color 0.3s; }
+        .nav-links a::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px; background: var(--primary); transition: width 0.3s; }
+        .nav-links a:hover { color: var(--primary); }
+        .nav-links a:hover::after { width: 100%; }
+        .nav-btn { background: var(--primary); color: white; padding: 12px 30px; border: none; border-radius: 30px; font-weight: 600; cursor: pointer; transition: all 0.3s; font-family: 'Inter', sans-serif; text-decoration: none; display: inline-block; }
+        .nav-btn:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255, 107, 0, 0.3); }
+        .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+        .hamburger span { width: 25px; height: 2px; background: var(--light); transition: all 0.3s; }
+
+        .hero { min-height: 100vh; display: flex; align-items: center; padding: 0 5%; position: relative; overflow: hidden; background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%); }
+        .hero::before { content: ''; position: absolute; top: 0; right: 0; width: 50%; height: 100%; background: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=80') center/cover; opacity: 0.15; mask-image: linear-gradient(to left, black, transparent); -webkit-mask-image: linear-gradient(to left, black, transparent); }
+        .hero-content { max-width: 700px; z-index: 2; }
+        .hero-subtitle { color: var(--primary); font-weight: 600; font-size: 1rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
+        .hero-subtitle::before { content: ''; width: 50px; height: 2px; background: var(--primary); }
+        .hero h1 { font-size: clamp(3rem, 6vw, 5.5rem); line-height: 1.1; margin-bottom: 25px; font-weight: 700; }
+        .hero h1 span { color: var(--primary); }
+        .hero p { font-size: 1.1rem; color: var(--gray); line-height: 1.8; margin-bottom: 40px; max-width: 500px; }
+        .hero-btns { display: flex; gap: 20px; flex-wrap: wrap; }
+        .btn-primary { background: var(--primary); color: white; padding: 16px 40px; border: none; border-radius: 50px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-3px); box-shadow: 0 15px 40px rgba(255, 107, 0, 0.4); }
+        .btn-outline { background: transparent; color: var(--light); padding: 16px 40px; border: 2px solid rgba(255,255,255,0.2); border-radius: 50px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-3px); }
+        .hero-stats { display: flex; gap: 50px; margin-top: 60px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .stat h3 { font-size: 2.5rem; color: var(--primary); font-weight: 700; }
+        .stat p { color: var(--gray); font-size: 0.9rem; margin: 0; }
+
+        section { padding: 100px 5%; }
+        .section-header { text-align: center; margin-bottom: 70px; }
+        .section-header h2 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 15px; }
+        .section-header h2 span { color: var(--primary); }
+        .section-header p { color: var(--gray); max-width: 600px; margin: 0 auto; font-size: 1.05rem; line-height: 1.7; }
+
+        .about { background: var(--dark); }
+        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+        .about-img { position: relative; }
+        .about-img img { width: 100%; border-radius: 20px; box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
+        .about-img::before { content: ''; position: absolute; top: -20px; left: -20px; width: 100%; height: 100%; border: 3px solid var(--primary); border-radius: 20px; z-index: -1; }
+        .about-content h3 { font-size: 2.5rem; margin-bottom: 20px; }
+        .about-content h3 span { color: var(--primary); }
+        .about-content p { color: var(--gray); line-height: 1.8; margin-bottom: 20px; }
+        .about-features { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
+        .about-feature { display: flex; align-items: center; gap: 12px; }
+        .about-feature i { width: 45px; height: 45px; background: rgba(255, 107, 0, 0.1); color: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+        .about-feature span { font-weight: 600; font-size: 0.95rem; }
+
+        .services { background: var(--darker); }
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .service-card { background: var(--dark); padding: 40px 30px; border-radius: 20px; text-align: center; transition: all 0.4s; border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; }
+        .service-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--primary); transform: scaleX(0); transition: transform 0.4s; }
+        .service-card:hover::before { transform: scaleX(1); }
+        .service-card:hover { transform: translateY(-10px); border-color: rgba(255, 107, 0, 0.3); box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        .service-icon { width: 80px; height: 80px; background: rgba(255, 107, 0, 0.1); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 2rem; color: var(--primary); transition: all 0.4s; }
+        .service-card:hover .service-icon { background: var(--primary); color: white; transform: rotateY(360deg); }
+        .service-card h3 { font-size: 1.4rem; margin-bottom: 15px; }
+        .service-card p { color: var(--gray); line-height: 1.7; font-size: 0.95rem; }
+
+        .trainers { background: var(--dark); }
+        .trainers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .trainer-card { background: var(--darker); border-radius: 20px; overflow: hidden; transition: all 0.4s; border: 1px solid rgba(255,255,255,0.05); }
+        .trainer-card:hover { transform: translateY(-10px); box-shadow: 0 25px 50px rgba(0,0,0,0.4); }
+        .trainer-img { height: 320px; overflow: hidden; position: relative; }
+        .trainer-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+        .trainer-card:hover .trainer-img img { transform: scale(1.1); }
+        .trainer-social { position: absolute; bottom: -50px; left: 0; width: 100%; display: flex; justify-content: center; gap: 15px; padding: 20px; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); transition: bottom 0.4s; }
+        .trainer-card:hover .trainer-social { bottom: 0; }
+        .trainer-social a { width: 40px; height: 40px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.3s; }
+        .trainer-social a:hover { background: white; color: var(--primary); transform: translateY(-3px); }
+        .trainer-info { padding: 25px; text-align: center; }
+        .trainer-info h3 { font-size: 1.3rem; margin-bottom: 5px; }
+        .trainer-info p { color: var(--primary); font-weight: 500; font-size: 0.9rem; }
+
+        .pricing { background: var(--darker); }
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; max-width: 1100px; margin: 0 auto; }
+        .pricing-card { background: var(--dark); border-radius: 20px; padding: 50px 35px; text-align: center; border: 1px solid rgba(255,255,255,0.05); transition: all 0.4s; position: relative; }
+        .pricing-card.popular { border: 2px solid var(--primary); transform: scale(1.05); }
+        .pricing-card.popular::before { content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 5px 20px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; }
+        .pricing-card:hover { transform: translateY(-10px); box-shadow: 0 25px 50px rgba(0,0,0,0.3); }
+        .pricing-card.popular:hover { transform: scale(1.05) translateY(-10px); }
+        .pricing-card h3 { font-size: 1.3rem; margin-bottom: 10px; }
+        .pricing-card .price { font-size: 3.5rem; font-weight: 700; color: var(--primary); margin: 20px 0; font-family: 'Oswald', sans-serif; }
+        .pricing-card .price span { font-size: 1rem; color: var(--gray); font-weight: 400; }
+        .pricing-features { list-style: none; margin: 30px 0; }
+        .pricing-features li { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--gray); display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .pricing-features li i { color: var(--success); }
+        .pricing-features li.not-included { color: #555; }
+        .pricing-features li.not-included i { color: #555; }
+
+        .bmi-section { background: linear-gradient(135deg, var(--secondary) 0%, var(--dark) 100%); padding: 80px 5%; }
+        .bmi-container { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; }
+        .bmi-content h2 { font-size: 2.5rem; margin-bottom: 15px; }
+        .bmi-content h2 span { color: var(--primary); }
+        .bmi-content p { color: var(--gray); line-height: 1.8; margin-bottom: 30px; }
+        .bmi-form { background: rgba(255,255,255,0.03); padding: 40px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.9rem; }
+        .form-group input { width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; font-size: 1rem; transition: all 0.3s; }
+        .form-group input:focus { outline: none; border-color: var(--primary); background: rgba(255,255,255,0.08); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .bmi-result { margin-top: 25px; padding: 20px; border-radius: 15px; text-align: center; display: none; }
+        .bmi-result.show { display: block; animation: fadeIn 0.5s; }
+        .bmi-result.underweight { background: rgba(33, 150, 243, 0.15); border: 1px solid rgba(33, 150, 243, 0.3); }
+        .bmi-result.normal { background: rgba(0, 200, 83, 0.15); border: 1px solid rgba(0, 200, 83, 0.3); }
+        .bmi-result.overweight { background: rgba(255, 193, 7, 0.15); border: 1px solid rgba(255, 193, 7, 0.3); }
+        .bmi-result.obese { background: rgba(244, 67, 54, 0.15); border: 1px solid rgba(244, 67, 54, 0.3); }
+        .bmi-result h4 { font-size: 1.5rem; margin-bottom: 5px; }
+        .bmi-result p { color: var(--gray); margin: 0; }
+
+        .gallery { background: var(--dark); }
+        .gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .gallery-item { position: relative; overflow: hidden; border-radius: 15px; height: 280px; cursor: pointer; }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+        .gallery-item:hover img { transform: scale(1.15); }
+        .gallery-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 107, 0, 0.8); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.4s; }
+        .gallery-item:hover .gallery-overlay { opacity: 1; }
+        .gallery-overlay i { font-size: 2rem; color: white; }
+        .gallery-item:nth-child(1) { grid-column: span 2; grid-row: span 2; height: auto; }
+        .gallery-item:nth-child(4) { grid-column: span 2; }
+
+        .testimonials { background: var(--darker); }
+        .testimonials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; }
+        .testimonial-card { background: var(--dark); padding: 40px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); position: relative; }
+        .testimonial-card::before { content: '"'; position: absolute; top: 20px; right: 30px; font-size: 5rem; color: var(--primary); opacity: 0.2; font-family: serif; line-height: 1; }
+        .testimonial-stars { color: #ffc107; margin-bottom: 20px; font-size: 0.9rem; }
+        .testimonial-text { color: var(--gray); line-height: 1.8; margin-bottom: 25px; font-style: italic; }
+        .testimonial-author { display: flex; align-items: center; gap: 15px; }
+        .testimonial-author img { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); }
+        .testimonial-author h4 { font-size: 1.1rem; margin-bottom: 3px; }
+        .testimonial-author p { color: var(--gray); font-size: 0.85rem; }
+
+        .contact { background: var(--dark); }
+        .contact-container { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; max-width: 1100px; margin: 0 auto; }
+        .contact-info h3 { font-size: 2rem; margin-bottom: 20px; }
+        .contact-info h3 span { color: var(--primary); }
+        .contact-info > p { color: var(--gray); line-height: 1.8; margin-bottom: 40px; }
+        .contact-details { display: flex; flex-direction: column; gap: 25px; }
+        .contact-item { display: flex; align-items: flex-start; gap: 20px; }
+        .contact-item i { width: 50px; height: 50px; background: rgba(255, 107, 0, 0.1); color: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+        .contact-item h4 { font-size: 1.1rem; margin-bottom: 5px; }
+        .contact-item p { color: var(--gray); font-size: 0.95rem; }
+        .contact-form { background: rgba(255,255,255,0.02); padding: 40px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        .contact-form h3 { font-size: 1.5rem; margin-bottom: 25px; }
+        .contact-form .form-group { margin-bottom: 20px; }
+        .contact-form input, .contact-form textarea { width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; font-size: 1rem; font-family: 'Inter', sans-serif; transition: all 0.3s; }
+        .contact-form input:focus, .contact-form textarea:focus { outline: none; border-color: var(--primary); background: rgba(255,255,255,0.08); }
+        .contact-form textarea { resize: vertical; min-height: 120px; }
+        .contact-form .btn-primary { width: 100%; justify-content: center; }
+
+        footer { background: var(--darker); padding: 60px 5% 30px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 50px; margin-bottom: 50px; }
+        .footer-brand .logo { margin-bottom: 20px; }
+        .footer-brand p { color: var(--gray); line-height: 1.8; margin-bottom: 25px; }
+        .footer-social { display: flex; gap: 15px; }
+        .footer-social a { width: 42px; height: 42px; background: rgba(255,255,255,0.05); color: var(--light); border-radius: 10px; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.3s; }
+        .footer-social a:hover { background: var(--primary); color: white; transform: translateY(-3px); }
+        .footer-links h4 { font-size: 1.2rem; margin-bottom: 25px; color: var(--light); }
+        .footer-links ul { list-style: none; }
+        .footer-links li { margin-bottom: 12px; }
+        .footer-links a { color: var(--gray); text-decoration: none; transition: all 0.3s; display: flex; align-items: center; gap: 8px; }
+        .footer-links a:hover { color: var(--primary); padding-left: 5px; }
+        .footer-bottom { text-align: center; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.05); color: var(--gray); font-size: 0.9rem; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { opacity: 0; transform: translateY(30px); transition: all 0.6s ease; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 1024px) {
+            .about-grid, .bmi-container, .contact-container { grid-template-columns: 1fr; }
+            .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+            .gallery-item:nth-child(1) { grid-column: span 2; grid-row: span 1; height: 280px; }
+            .gallery-item:nth-child(4) { grid-column: span 1; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hamburger { display: flex; }
+            .hero { padding-top: 100px; text-align: center; }
+            .hero-stats { justify-content: center; gap: 30px; }
+            .hero-btns { justify-content: center; }
+            .about-features { grid-template-columns: 1fr; }
+            .pricing-card.popular { transform: none; }
+            .pricing-card.popular:hover { transform: translateY(-10px); }
+            .gallery-grid { grid-template-columns: 1fr; }
+            .gallery-item:nth-child(1) { grid-column: span 1; height: 280px; }
+            .footer-grid { grid-template-columns: 1fr; gap: 40px; }
+            section { padding: 60px 5%; }
+        }
+
+        .mobile-menu { position: fixed; top: 0; right: -100%; width: 80%; max-width: 350px; height: 100vh; background: var(--dark); z-index: 2000; padding: 80px 40px; transition: right 0.4s ease; box-shadow: -10px 0 50px rgba(0,0,0,0.5); }
+        .mobile-menu.active { right: 0; }
+        .mobile-menu ul { list-style: none; }
+        .mobile-menu li { margin-bottom: 25px; }
+        .mobile-menu a { color: var(--light); text-decoration: none; font-size: 1.3rem; font-weight: 600; font-family: 'Oswald', sans-serif; text-transform: uppercase; transition: color 0.3s; }
+        .mobile-menu a:hover { color: var(--primary); }
+        .mobile-menu .nav-btn { margin-top: 20px; display: inline-block; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1500; opacity: 0; visibility: hidden; transition: all 0.4s; }
+        .overlay.active { opacity: 1; visibility: visible; }
+        .close-menu { position: absolute; top: 25px; right: 25px; font-size: 1.5rem; color: var(--light); cursor: pointer; background: none; border: none; }
+    </style>
+</head>
+<body>
+
+    <nav id="navbar">
+        <a href="#" class="logo"><i class="fas fa-dumbbell"></i>IRONPULSE</a>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#trainers">Trainers</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <a href="#pricing" class="nav-btn">Join Now</a>
+        <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+    </nav>
+
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="close-menu" onclick="toggleMenu()"><i class="fas fa-times"></i></button>
+        <ul>
+            <li><a href="#home" onclick="toggleMenu()">Home</a></li>
+            <li><a href="#about" onclick="toggleMenu()">About</a></li>
+            <li><a href="#services" onclick="toggleMenu()">Services</a></li>
+            <li><a href="#trainers" onclick="toggleMenu()">Trainers</a></li>
+            <li><a href="#pricing" onclick="toggleMenu()">Pricing</a></li>
+            <li><a href="#contact" onclick="toggleMenu()">Contact</a></li>
+        </ul>
+        <a href="#pricing" class="nav-btn" onclick="toggleMenu()">Join Now</a>
+    </div>
+
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <div class="hero-subtitle">Welcome to IronPulse</div>
+            <h1>Build Your <span>Body</span> Strong</h1>
+            <p>Transform your physique and unlock your full potential with our world-class training programs, expert coaches, and state-of-the-art facilities.</p>
+            <div class="hero-btns">
+                <a href="#pricing" class="btn-primary"><i class="fas fa-rocket"></i>Start Your Journey</a>
+                <a href="#about" class="btn-outline"><i class="fas fa-play-circle"></i>Learn More</a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat"><h3>10K+</h3><p>Happy Members</p></div>
+                <div class="stat"><h3>50+</h3><p>Expert Trainers</p></div>
+                <div class="stat"><h3>15+</h3><p>Years Experience</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="about" id="about">
+        <div class="about-grid">
+            <div class="about-img fade-in">
+                <img src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80" alt="Gym Interior">
+            </div>
+            <div class="about-content fade-in">
+                <h3>About <span>Our Gym</span></h3>
+                <p>IronPulse Gym has been transforming lives since 2009. We believe that fitness is not just about looking good — it's about feeling powerful, confident, and unstoppable.</p>
+                <p>Our 20,000 sq. ft. facility features cutting-edge equipment, dedicated zones for strength, cardio, and functional training, plus a recovery spa to help you recharge.</p>
+                <div class="about-features">
+                    <div class="about-feature"><i class="fas fa-check"></i><span>Modern Equipment</span></div>
+                    <div class="about-feature"><i class="fas fa-check"></i><span>Expert Trainers</span></div>
+                    <div class="about-feature"><i class="fas fa-check"></i><span>24/7 Access</span></div>
+                    <div class="about-feature"><i class="fas fa-check"></i><span>Nutrition Plans</span></div>
+                    <div class="about-feature"><i class="fas fa-check"></i><span>Group Classes</span></div>
+                    <div class="about-feature"><i class="fas fa-check"></i><span>Recovery Spa</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="services" id="services">
+        <div class="section-header fade-in">
+            <h2>Our <span>Services</span></h2>
+            <p>We offer a wide range of fitness services designed to help you achieve your goals, no matter your fitness level.</p>
+        </div>
+        <div class="services-grid">
+            <div class="service-card fade-in">
+                <div class="service-icon"><i class="fas fa-dumbbell"></i></div>
+                <h3>Strength Training</h3>
+                <p>Build muscle and increase strength with our comprehensive weight training programs and expert guidance.</p>
+            </div>
+            <div class="service-card fade-in">
+                <div class="service-icon"><i class="fas fa-heart-pulse"></i></div>
+                <h3>Cardio Fitness</h3>
+                <p>Boost your endurance and heart health with treadmills, ellipticals, rowing machines, and cycling classes.</p>
+            </div>
+            <div class="service-card fade-in">
+                <div class="service-icon"><i class="fas fa-person-running"></i></div>
+                <h3>CrossFit</h3>
+                <p>High-intensity functional training that combines weightlifting, gymnastics, and cardio for total fitness.</p>
+            </div>
+            <div class="service-card fade-in">
+                <div class="service-icon"><i class="fas fa-spa"></i></div>
+                <h3>Yoga & Stretching</h3>
+                <p>Improve flexibility, reduce stress, and find balance with our yoga and stretching sessions.</p>
+            </div>
+            <div class="service-card fade-in">
+                <div class="service-icon"><i class="fas fa-users"></i></div>
+                <h3>Group Classes</h3>
+                <p>Stay motivated with energetic group workouts including Zumba, HIIT, Spin, and Boxing classes.</p>
+            </div>
+            <div class="service-card fade-in">
+                <div class="service-icon"><i class="fas fa-apple-whole"></i></div>
+                <h3>Nutrition Coaching</h3>
+                <p>Get personalized meal plans and nutrition advice from certified dietitians to fuel your progress.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="trainers" id="trainers">
+        <div class="section-header fade-in">
+            <h2>Expert <span>Trainers</span></h2>
+            <p>Our certified trainers are here to guide, motivate, and push you to reach your full potential.</p>
+        </div>
+        <div class="trainers-grid">
+            <div class="trainer-card fade-in">
+                <div class="trainer-img">
+                    <img src="https://images.unsplash.com/photo-1567013127542-490d757e51fc?w=500&q=80" alt="Trainer">
+                    <div class="trainer-social">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="trainer-info"><h3>Rajesh Sharma</h3><p>Strength & Conditioning</p></div>
+            </div>
+            <div class="trainer-card fade-in">
+                <div class="trainer-img">
+                    <img src="https://images.unsplash.com/photo-1594381898411-846e7d193883?w=500&q=80" alt="Trainer">
+                    <div class="trainer-social">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="trainer-info"><h3>Priya Patel</h3><p>Yoga & Pilates Expert</p></div>
+            </div>
+            <div class="trainer-card fade-in">
+                <div class="trainer-img">
+                    <img src="https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=500&q=80" alt="Trainer">
+                    <div class="trainer-social">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="trainer-info"><h3>Amit Kumar</h3><p>CrossFit Coach</p></div>
+            </div>
+            <div class="trainer-card fade-in">
+                <div class="trainer-img">
+                    <img src="https://images.unsplash.com/photo-1611672585731-fa10603fb9e0?w=500&q=80" alt="Trainer">
+                    <div class="trainer-social">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="trainer-info"><h3>Neha Gupta</h3><p>Cardio & HIIT Specialist</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="pricing" id="pricing">
+        <div class="section-header fade-in">
+            <h2>Membership <span>Plans</span></h2>
+            <p>Choose the plan that fits your goals and budget. All plans include full gym access.</p>
+        </div>
+        <div class="pricing-grid">
+            <div class="pricing-card fade-in">
+                <h3>Basic</h3>
+                <div class="price">Rs.999<span>/month</span></div>
+                <ul class="pricing-features">
+                    <li><i class="fas fa-check"></i> Gym Access (6 AM - 10 PM)</li>
+                    <li><i class="fas fa-check"></i> Basic Equipment</li>
+                    <li><i class="fas fa-check"></i> Locker Room Access</li>
+                    <li><i class="fas fa-check"></i> Free WiFi</li>
+                    <li class="not-included"><i class="fas fa-times"></i> Personal Training</li>
+                    <li class="not-included"><i class="fas fa-times"></i> Group Classes</li>
+                    <li class="not-included"><i class="fas fa-times"></i> Nutrition Plan</li>
+                </ul>
+                <a href="#contact" class="btn-outline" style="width:100%;justify-content:center;">Choose Plan</a>
+            </div>
+            <div class="pricing-card popular fade-in">
+                <h3>Pro</h3>
+                <div class="price">Rs.1,999<span>/month</span></div>
+                <ul class="pricing-features">
+                    <li><i class="fas fa-check"></i> 24/7 Gym Access</li>
+                    <li><i class="fas fa-check"></i> All Equipment</li>
+                    <li><i class="fas fa-check"></i> Locker + Steam Room</li>
+                    <li><i class="fas fa-check"></i> Free WiFi</li>
+                    <li><i class="fas fa-check"></i> 4 PT Sessions/Month</li>
+                    <li><i class="fas fa-check"></i> All Group Classes</li>
+                    <li class="not-included"><i class="fas fa-times"></i> Nutrition Plan</li>
+                </ul>
+                <a href="#contact" class="btn-primary" style="width:100%;justify-content:center;">Choose Plan</a>
+            </div>
+            <div class="pricing-card fade-in">
+                <h3>Elite</h3>
+                <div class="price">Rs.3,499<span>/month</span></div>
+                <ul class="pricing-features">
+                    <li><i class="fas fa-check"></i> 24/7 Gym Access</li>
+                    <li><i class="fas fa-check"></i> All Equipment + VIP Area</li>
+                    <li><i class="fas fa-check"></i> Locker + Spa Access</li>
+                    <li><i class="fas fa-check"></i> Free WiFi</li>
+                    <li><i class="fas fa-check"></i> Unlimited PT Sessions</li>
+                    <li><i class="fas fa-check"></i> All Group Classes</li>
+                    <li><i class="fas fa-check"></i> Custom Nutrition Plan</li>
+                </ul>
+                <a href="#contact" class="btn-outline" style="width:100%;justify-content:center;">Choose Plan</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="bmi-section">
+        <div class="bmi-container">
+            <div class="bmi-content fade-in">
+                <h2>Calculate Your <span>BMI</span></h2>
+                <p>Body Mass Index (BMI) is a simple way to check if your weight is healthy for your height. Use our calculator to find out where you stand and get personalized recommendations.</p>
+                <div style="display:flex;gap:30px;margin-top:30px;">
+                    <div><h4 style="color:var(--primary);font-size:1.5rem;margin-bottom:5px;">Healthy</h4><p style="color:var(--gray);font-size:0.9rem;">BMI 18.5 - 24.9</p></div>
+                    <div><h4 style="color:#ffc107;font-size:1.5rem;margin-bottom:5px;">Overweight</h4><p style="color:var(--gray);font-size:0.9rem;">BMI 25 - 29.9</p></div>
+                    <div><h4 style="color:#f44336;font-size:1.5rem;margin-bottom:5px;">Obese</h4><p style="color:var(--gray);font-size:0.9rem;">BMI 30+</p></div>
+                </div>
+            </div>
+            <div class="bmi-form fade-in">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Height (cm)</label>
+                        <input type="number" id="height" placeholder="e.g. 175" min="50" max="300">
+                    </div>
+                    <div class="form-group">
+                        <label>Weight (kg)</label>
+                        <input type="number" id="weight" placeholder="e.g. 70" min="20" max="300">
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="calculateBMI()" style="width:100%;justify-content:center;"><i class="fas fa-calculator"></i>Calculate BMI</button>
+                <div class="bmi-result" id="bmiResult">
+                    <h4 id="bmiValue">--</h4>
+                    <p id="bmiCategory">--</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="gallery" id="gallery">
+        <div class="section-header fade-in">
+            <h2>Our <span>Gallery</span></h2>
+            <p>Take a look inside our world-class facility and see what makes IronPulse special.</p>
+        </div>
+        <div class="gallery-grid">
+            <div class="gallery-item fade-in"><img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80" alt="Gym"><div class="gallery-overlay"><i class="fas fa-search-plus"></i></div></div>
+            <div class="gallery-item fade-in"><img src="https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=500&q=80" alt="Weights"><div class="gallery-overlay"><i class="fas fa-search-plus"></i></div></div>
+            <div class="gallery-item fade-in"><img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500&q=80" alt="Training"><div class="gallery-overlay"><i class="fas fa-search-plus"></i></div></div>
+            <div class="gallery-item fade-in"><img src="https://images.unsplash.com/photo-1549060279-7e168fcee0c2?w=800&q=80" alt="Cardio"><div class="gallery-overlay"><i class="fas fa-search-plus"></i></div></div>
+            <div class="gallery-item fade-in"><img src="https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?w=500&q=80" alt="Yoga"><div class="gallery-overlay"><i class="fas fa-search-plus"></i></div></div>
+        </div>
+    </section>
+
+    <section class="testimonials">
+        <div class="section-header fade-in">
+            <h2>Member <span>Reviews</span></h2>
+            <p>See what our members have to say about their transformation journey at IronPulse.</p>
+        </div>
+        <div class="testimonials-grid">
+            <div class="testimonial-card fade-in">
+                <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                <p class="testimonial-text">"IronPulse completely changed my life. I lost 20kg in 6 months and gained so much confidence. The trainers are incredibly supportive and the community is amazing!"</p>
+                <div class="testimonial-author">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80" alt="Member">
+                    <div><h4>Rahul Verma</h4><p>Member since 2022</p></div>
+                </div>
+            </div>
+            <div class="testimonial-card fade-in">
+                <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                <p class="testimonial-text">"The best gym I have ever been to! The equipment is top-notch, always clean, and the 24/7 access fits perfectly with my busy schedule. Highly recommended!"</p>
+                <div class="testimonial-author">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80" alt="Member">
+                    <div><h4>Ananya Singh</h4><p>Member since 2023</p></div>
+                </div>
+            </div>
+            <div class="testimonial-card fade-in">
+                <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
+                <p class="testimonial-text">"The personal training here is exceptional. My trainer designed a program that helped me build muscle while managing my back pain. Professional and caring team!"</p>
+                <div class="testimonial-author">
+                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80" alt="Member">
+                    <div><h4>Vikram Rao</h4><p>Member since 2021</p></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="contact" id="contact">
+        <div class="contact-container">
+            <div class="contact-info fade-in">
+                <h3>Get In <span>Touch</span></h3>
+                <p>Ready to start your fitness journey? Contact us today and take the first step towards a healthier, stronger you.</p>
+                <div class="contact-details">
+                    <div class="contact-item">
+                        <i class="fas fa-location-dot"></i>
+                        <div><h4>Location</h4><p>123 Fitness Street, Mumbai, Maharashtra 400001</p></div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <div><h4>Phone</h4><p>+91 98765 43210</p></div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div><h4>Email</h4><p>info@ironpulse.com</p></div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-clock"></i>
+                        <div><h4>Working Hours</h4><p>Mon - Sun: 24/7 Open</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="contact-form fade-in">
+                <h3>Send Message</h3>
+                <form onsubmit="event.preventDefault(); alert('Thank you! We will contact you soon.');">
+                    <div class="form-group"><input type="text" placeholder="Your Name" required></div>
+                    <div class="form-group"><input type="email" placeholder="Your Email" required></div>
+                    <div class="form-group"><input type="tel" placeholder="Phone Number"></div>
+                    <div class="form-group"><textarea placeholder="Your Message" required></textarea></div>
+                    <button type="submit" class="btn-primary"><i class="fas fa-paper-plane"></i>Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <a href="#" class="logo"><i class="fas fa-dumbbell"></i>IRONPULSE</a>
+                <p>Transforming lives through fitness since 2009. Join our community and become the strongest version of yourself.</p>
+                <div class="footer-social">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#home"><i class="fas fa-chevron-right"></i>Home</a></li>
+                    <li><a href="#about"><i class="fas fa-chevron-right"></i>About</a></li>
+                    <li><a href="#services"><i class="fas fa-chevron-right"></i>Services</a></li>
+                    <li><a href="#trainers"><i class="fas fa-chevron-right"></i>Trainers</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i>Strength Training</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i>Cardio Fitness</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i>CrossFit</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i>Yoga Classes</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i>FAQ</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i>Privacy Policy</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i>Terms of Service</a></li>
+                    <li><a href="#contact"><i class="fas fa-chevron-right"></i>Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 IronPulse Gym. All rights reserved. Designed with <i class="fas fa-heart" style="color:var(--primary);"></i> for fitness lovers.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) { navbar.classList.add('scrolled'); }
+            else { navbar.classList.remove('scrolled'); }
+        });
+
+        // Mobile menu toggle
+        function toggleMenu() {
+            document.getElementById('mobileMenu').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+            document.body.style.overflow = document.getElementById('mobileMenu').classList.contains('active') ? 'hidden' : '';
+        }
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+            });
+        });
+
+        // Fade in animation on scroll
+        const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) { entry.target.classList.add('visible'); }
+            });
+        }, observerOptions);
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        // BMI Calculator
+        function calculateBMI() {
+            const height = parseFloat(document.getElementById('height').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            const resultDiv = document.getElementById('bmiResult');
+            const valueEl = document.getElementById('bmiValue');
+            const categoryEl = document.getElementById('bmiCategory');
+
+            if (!height || !weight || height <= 0 || weight <= 0) {
+                alert('Please enter valid height and weight values.');
+                return;
+            }
+
+            const bmi = weight / ((height / 100) ** 2);
+            const bmiRounded = bmi.toFixed(1);
+
+            resultDiv.classList.remove('underweight', 'normal', 'overweight', 'obese', 'show');
+
+            let category = '';
+            let className = '';
+
+            if (bmi < 18.5) { category = 'Underweight'; className = 'underweight'; }
+            else if (bmi < 25) { category = 'Normal Weight'; className = 'normal'; }
+            else if (bmi < 30) { category = 'Overweight'; className = 'overweight'; }
+            else { category = 'Obese'; className = 'obese'; }
+
+            valueEl.textContent = 'BMI: ' + bmiRounded;
+            categoryEl.textContent = category + ' - ' + getRecommendation(bmi);
+            resultDiv.classList.add(className, 'show');
+        }
+
+        function getRecommendation(bmi) {
+            if (bmi < 18.5) return 'Consider strength training and a calorie-surplus diet.';
+            if (bmi < 25) return 'Great job! Maintain with balanced diet and regular exercise.';
+            if (bmi < 30) return 'Focus on cardio and a calorie-deficit diet plan.';
+            return 'Consult a trainer for a personalized weight-loss program.';
+        }
+    </script>
+</body>
+</html>
